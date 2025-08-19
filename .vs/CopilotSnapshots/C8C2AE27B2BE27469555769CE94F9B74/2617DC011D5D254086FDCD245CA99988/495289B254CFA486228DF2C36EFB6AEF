@@ -1,0 +1,159 @@
+﻿using System.Text;
+using AIService.Models;
+using DotnetGeminiSDK.Client;
+using DotnetGeminiSDK.Model;
+
+namespace AIService.Services;
+
+public class GeminiAiService : IGeminiAiService
+{
+    private readonly GeminiClient _client;
+    private readonly ILogger<GeminiAiService> _logger;
+
+    public GeminiAiService(IConfiguration configuration, ILogger<GeminiAiService> logger)
+    {
+        _logger = logger;
+        var apiKey = configuration["Gemini:ApiKey"] ?? string.Empty;
+        _client = new GeminiClient(apiKey);
+    }
+
+    public async Task<List<string>> ExtractKeywordsFromCaseAsync(string caseText)
+    {
+        try
+        {
+            var prompt = $$"""
+Aşağıdaki hukuki olay metnini analiz et ve Yargıtay kararlarında arama yapmak için en uygun anahtar kelimeleri çıkar.
+Anahtar kelimeler Türk hukuku terminolojisine uygun olmalı.
+
+Olay metni:
+{caseText}
+
+Sadece anahtar kelimeleri virgülle ayırarak listele. Açıklama yazma.
+Örnek format: "tazminat, sözleşme ihlali, maddi zarar, manevi tazminat"
+""";
+            var request = new GenerateTextRequest
+            {
+                Contents = new List<Content>
+                {
+                    new()
+                    {
+                        Parts = new List<IPart>{ new TextData(prompt) }
+                    }
+                }
+            };
+            var response = await _client.GenerateTextAsync("gemini-1.5-flash", request);
+            var text = response?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.GetAsType<TextData>()?.Text ?? string.Empty;
+            var kws = text.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                          .Select(k => k.Trim())
+                          .Where(k => k.Length > 0)
+                          .Distinct(StringComparer.OrdinalIgnoreCase)
+                          .ToList();
+            _logger.LogInformation("{Count} anahtar kelime üretildi", kws.Count);
+            return kws;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Anahtar kelime çıkarma hatası");
+            return new List<string> { "tazminat", "hukuki sorumluluk" };
+        }
+    }
+
+    public async Task<RelevanceResponse> AnalyzeDecisionRelevanceAsync(string caseText, string decisionText)
+    {
+        try
+        {
+            var truncated = decisionText.Length > 2000 ? decisionText[..2000] : decisionText;
+            var prompt = $$"""
+Olay metni ile Yargıtay kararı arasındaki ilişkiyi analiz et.
+
+OLAY METNİ:
+{caseText}
+
+YARGITAY KARARI (kısaltılmış):
+{truncated}
+
+Aşağıdaki formatta cevap ver:
+PUAN: [0-100 arası sayı]
+AÇIKLAMA: [Kısa açıklama]
+BENZERLIK: [Hangi konularda benzer]
+""";
+            var request = new GenerateTextRequest
+            {
+                Contents = new List<Content>{ new(){ Parts = new List<IPart>{ new TextData(prompt) } } }
+            };
+            var resp = await _client.GenerateTextAsync("gemini-1.5-pro", request);
+            var text = resp?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.GetAsType<TextData>()?.Text ?? string.Empty;
+            return ParseAnalysisResponse(text);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Karar analiz hatası");
+            return new RelevanceResponse{ Score = 50, Explanation = "Analiz sırasında hata oluştu", Similarity = "Belirlenemedi" };
+        }
+    }
+
+    public async Task<string> GeneratePetitionTemplateAsync(string caseText, List<RelevantDecisionDto> relevantDecisions)
+    {
+        try
+        {
+            var sb = new StringBuilder();
+            foreach (var d in relevantDecisions.Take(3))
+            {
+                var summary = d.Summary;
+                if (!string.IsNullOrEmpty(summary) && summary.Length > 200) summary = summary[..200];
+                sb.AppendLine($"- {d.Title ?? "Başlık yok"}: {summary ?? "Özet yok"}");
+            }
+            var prompt = $$"""
+Aşağıdaki bilgileri kullanarak hukuki dilekçe şablonu oluştur.
+
+OLAY METNİ:
+{caseText}
+
+ALAKALI YARGITAY KARARLARI:
+{sb}
+
+Standart hukuki dilekçe formatında, emsal kararları referans alan bir şablon üret.
+Bölümler:
+- Başlık
+- Taraflar
+- Olaylar
+- Hukuki Dayanak
+- Emsal Kararlar
+- Talep
+""";
+            var request = new GenerateTextRequest
+            {
+                Contents = new List<Content>{ new(){ Parts = new List<IPart>{ new TextData(prompt) } } }
+            };
+            var resp = await _client.GenerateTextAsync("gemini-1.5-pro", request);
+            var text = resp?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.GetAsType<TextData>()?.Text ?? string.Empty;
+            return text.Trim();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Dilekçe oluşturma hatası");
+            return "Dilekçe şablonu oluşturulamadı. Lütfen tekrar deneyin.";
+        }
+    }
+
+    private RelevanceResponse ParseAnalysisResponse(string text)
+    {
+        var resp = new RelevanceResponse{ Score = 50, Explanation = "Analiz tamamlandı", Similarity = "Genel" };
+        foreach(var line in text.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (line.StartsWith("PUAN:", StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(line.Split(':',2)[1].Trim(), out var s)) resp.Score = Math.Clamp(s,0,100);
+            }
+            else if (line.StartsWith("AÇIKLAMA:", StringComparison.OrdinalIgnoreCase))
+            {
+                resp.Explanation = line.Split(':',2)[1].Trim();
+            }
+            else if (line.StartsWith("BENZERLIK:", StringComparison.OrdinalIgnoreCase) || line.StartsWith("BENZERLİK:", StringComparison.OrdinalIgnoreCase))
+            {
+                resp.Similarity = line.Split(':',2)[1].Trim();
+            }
+        }
+        return resp;
+    }
+}

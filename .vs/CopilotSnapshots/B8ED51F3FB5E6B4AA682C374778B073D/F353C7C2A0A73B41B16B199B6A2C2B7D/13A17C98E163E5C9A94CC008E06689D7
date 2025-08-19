@@ -1,0 +1,17 @@
+﻿syntax = "proto3";
+
+package subscriptions;
+option csharp_namespace = "subscriptions";
+
+service Subscription {
+  rpc CheckSubscriptionStatus (CheckStatusRequest) returns (CheckStatusResponse);
+}
+
+message CheckStatusRequest {
+  string user_id = 1;
+}
+
+message CheckStatusResponse {
+  bool has_active_subscription = 1;
+  int32 remaining_credits = 2;
+}

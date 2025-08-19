@@ -1,0 +1,43 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
+using SubscriptionService;
+using SubscriptionService.Services;
+using subscriptions;
+using Xunit;
+using System;
+using System.Threading.Tasks;
+
+namespace SubscriptionService.UnitTests;
+
+public class SubscriptionGrpcServiceTests
+{
+    [Fact]
+    public async Task CheckSubscriptionStatus_ReturnsInactive_WhenNotFound()
+    {
+        var options = new DbContextOptionsBuilder<SubscriptionDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        await using var ctx = new SubscriptionDbContext(options);
+        var logger = Mock.Of<ILogger<SubscriptionGrpcService>>();
+        var svc = new SubscriptionGrpcService(logger, ctx);
+
+        var resp = await svc.CheckSubscriptionStatus(new CheckStatusRequest{ UserId="user-1" }, null!);
+        Assert.False(resp.HasActiveSubscription);
+        Assert.Equal(0, resp.RemainingCredits);
+    }
+
+    [Fact]
+    public async Task CheckSubscriptionStatus_ReturnsActive_WhenCreditsPositive()
+    {
+        var options = new DbContextOptionsBuilder<SubscriptionDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        await using var ctx = new SubscriptionDbContext(options);
+        ctx.UserSubscriptions.Add(new UserSubscription{ UserId="user-2", RemainingCredits=5 });
+        await ctx.SaveChangesAsync();
+        var logger = Mock.Of<ILogger<SubscriptionGrpcService>>();
+        var svc = new SubscriptionGrpcService(logger, ctx);
+        var resp = await svc.CheckSubscriptionStatus(new CheckStatusRequest{ UserId="user-2" }, null!);
+        Assert.True(resp.HasActiveSubscription);
+        Assert.Equal(5, resp.RemainingCredits);
+    }
+}

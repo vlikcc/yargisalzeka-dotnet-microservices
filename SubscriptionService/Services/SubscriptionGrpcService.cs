@@ -1,0 +1,40 @@
+using Grpc.Core;
+using Microsoft.EntityFrameworkCore;
+using subscriptions;
+
+namespace SubscriptionService.Services
+{
+    public class SubscriptionGrpcService : Subscription.SubscriptionBase
+    {
+        private readonly ILogger<SubscriptionGrpcService> _logger;
+        private readonly SubscriptionDbContext _dbContext;
+
+        public SubscriptionGrpcService(ILogger<SubscriptionGrpcService> logger, SubscriptionDbContext dbContext)
+        {
+            _logger = logger;
+            _dbContext = dbContext;
+        }
+
+        public override async Task<CheckStatusResponse> CheckSubscriptionStatus(CheckStatusRequest request, ServerCallContext context)
+        {
+            _logger.LogInformation("Kullan?c?n?n abonelik durumu kontrol ediliyor: {UserId}", request.UserId);
+            var sub = await _dbContext.UserSubscriptions.AsNoTracking()
+                .FirstOrDefaultAsync(s => s.UserId == request.UserId);
+
+            if (sub == null)
+            {
+                return new CheckStatusResponse
+                {
+                    HasActiveSubscription = false,
+                    RemainingCredits = 0
+                };
+            }
+
+            return new CheckStatusResponse
+            {
+                HasActiveSubscription = sub.RemainingCredits > 0,
+                RemainingCredits = sub.RemainingCredits
+            };
+        }
+    }
+}

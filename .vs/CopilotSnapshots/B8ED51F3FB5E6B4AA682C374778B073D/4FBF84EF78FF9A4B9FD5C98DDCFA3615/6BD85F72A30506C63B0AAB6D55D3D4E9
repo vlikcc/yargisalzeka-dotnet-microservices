@@ -1,0 +1,6 @@
+﻿namespace IdentityService.Controllers
+{
+    public class AuthController
+    {
+    }
+}

@@ -1,0 +1,30 @@
+﻿using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using SubscriptionService.Data;
+using SubscriptionService.Entities;
+using subscriptions;
+using Xunit;
+
+namespace SubscriptionService.IntegrationTests;
+
+public class GrpcEndpointTests : IClassFixture<WebApplicationFactory<Program>>
+{
+    private readonly WebApplicationFactory<Program> _factory;
+    public GrpcEndpointTests(WebApplicationFactory<Program> factory)
+    {
+        _factory = factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                // Replace DB with in-memory
+                var descriptor = services.Single(s => s.ServiceType == typeof(DbContextOptions<SubscriptionDbContext>));
+                services.Remove(descriptor);
+                services.AddDbContext<SubscriptionDbContext>(o => o.UseInMemoryDatabase("it-db"));
+            });
+        });
+    }
+
+    [Fact(Skip="gRPC integration needs GrpcChannel setup - placeholder")] 
+    public void Placeholder() => Assert.True(true);
+}

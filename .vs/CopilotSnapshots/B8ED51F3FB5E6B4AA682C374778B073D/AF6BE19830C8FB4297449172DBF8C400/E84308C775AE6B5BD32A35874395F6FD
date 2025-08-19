@@ -1,0 +1,42 @@
+﻿using AIService.Entities;
+using Microsoft.AspNetCore.Mvc;
+using subscriptions;
+
+namespace AIService.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AIController : ControllerBase
+    {
+        private readonly Subscription.SubscriptionClient _subscriptionClient;
+        private readonly ILogger<AIController> _logger;
+
+        public AIController(Subscription.SubscriptionClient subscriptionClient, ILogger<AIController> logger)
+        {
+            _subscriptionClient = subscriptionClient;
+            _logger = logger;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Analyze([FromBody] AnalysisRequest request)
+        {
+            var userId = "temp-user-id"; // TODO: Extract from JWT token.
+            _logger.LogInformation("Checking subscription for user {UserId}", userId);
+
+            var statusResponse = await _subscriptionClient.CheckSubscriptionStatusAsync(
+                new CheckStatusRequest { UserId = userId });
+
+            if (!statusResponse.HasActiveSubscription || statusResponse.RemainingCredits <= 0)
+            {
+                return Forbid("No active subscription or credits left.");
+            }
+
+            var resultSummary = $"Processed text length: {request.Text?.Length ?? 0}";
+            _logger.LogInformation("User {UserId} has {Credits} credits. Analysis done.", userId, statusResponse.RemainingCredits);
+
+            return Ok(new { Status = "Analysis Completed", Summary = resultSummary, RemainingCredits = statusResponse.RemainingCredits - 1 });
+        }
+    }
+
+   
+}

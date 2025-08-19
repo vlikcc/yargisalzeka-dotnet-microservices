@@ -1,0 +1,31 @@
+﻿using PactNet;
+using PactNet.Matchers;
+using Xunit;
+using System.Net.Http;
+using System.Threading.Tasks;
+
+namespace ApiGateway.ContractTests;
+
+public class SampleConsumerPactTests
+{
+    [Fact(Skip="Demo - configure provider verification separately")] // Placeholder example
+    public async Task AuthServiceContract()
+    {
+        var pact = Pact.V4("IdentityConsumer", "IdentityService", new PactConfig());
+        await pact.WithHttpInteractions(interactions =>
+        {
+            interactions
+                .AddInteraction()
+                .Given("User does not exist")
+                .UponReceiving("Valid register request")
+                .WithRequest(HttpMethod.Post, "/api/auth/register")
+                .WithJsonBody(new { email = Match.Type("user@test.com"), password = Match.Type("Pass123!") })
+                .WillRespond()
+                .WithStatus(200);
+        })
+        .VerifyAsync(async ctx => {
+            using var client = new HttpClient{ BaseAddress = ctx.MockServerUri };
+            var resp = await client.PostAsJsonAsync("/api/auth/register", new { email = "user@test.com", password = "Pass123!" });
+        });
+    }
+}

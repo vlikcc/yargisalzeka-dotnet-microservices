@@ -1,0 +1,17 @@
+﻿{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "GrpcServices": {
+    "SubscriptionUrl": "http://localhost:5002"
+  },
+  "Jwt": {
+    "Key": "BU_COK_GIZLI_VE_UZUN_BIR_ANAHTAR_OLMALI_EN_AZ_32_KARAKTER",
+    "Issuer": "http://localhost:5001",
+    "Audience": "http://localhost:5001"
+  }
+}

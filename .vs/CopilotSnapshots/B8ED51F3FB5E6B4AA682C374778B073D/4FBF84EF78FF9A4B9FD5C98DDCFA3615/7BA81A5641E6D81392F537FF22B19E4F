@@ -1,0 +1,12 @@
+﻿{
+  "Logging": { /*...*/ },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Port=5432;Database=IdentityDb;User Id=postgres;Password=YOUR_PASSWORD;"
+  },
+  "Jwt": {
+    "Key": "BU_COK_GIZLI_VE_UZUN_BIR_ANAHTAR_OLMALI_EN_AZ_32_KARAKTER",
+    "Issuer": "http://localhost:5001", // IdentityService portu
+    "Audience": "http://localhost:5001"
+  }
+}

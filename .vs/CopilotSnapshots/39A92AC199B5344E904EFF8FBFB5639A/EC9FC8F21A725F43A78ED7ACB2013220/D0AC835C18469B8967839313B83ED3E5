@@ -1,0 +1,46 @@
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Grpc.Net.Client;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using SubscriptionService;
+using SubscriptionService.Services;
+using subscriptions;
+using Xunit;
+
+namespace SubscriptionService.IntegrationTests;
+
+public class GrpcEndpointTests : IClassFixture<WebApplicationFactory<Program>>
+{
+    private readonly WebApplicationFactory<Program> _factory;
+    public GrpcEndpointTests(WebApplicationFactory<Program> factory)
+    {
+        _factory = factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                var descriptor = services.SingleOrDefault(s => s.ServiceType == typeof(DbContextOptions<SubscriptionDbContext>));
+                if (descriptor != null) services.Remove(descriptor);
+                services.AddDbContext<SubscriptionDbContext>(o => o.UseInMemoryDatabase("it-db"));
+                // Build provider to seed
+                var sp = services.BuildServiceProvider();
+                using var scope = sp.CreateScope();
+                var ctx = scope.ServiceProvider.GetRequiredService<SubscriptionDbContext>();
+                ctx.UserSubscriptions.Add(new UserSubscription { UserId = "user-x", RemainingCredits = 7 });
+                ctx.SaveChanges();
+            });
+        });
+    }
+
+    [Fact]
+    public async Task CheckSubscriptionStatus_ReturnsSeededCredits()
+    {
+        var client = _factory.CreateDefaultClient();
+        using var channel = GrpcChannel.ForAddress(client.BaseAddress!, new GrpcChannelOptions { HttpClient = client });
+        var grpc = new Subscription.SubscriptionClient(channel);
+        var resp = await grpc.CheckSubscriptionStatusAsync(new CheckStatusRequest { UserId = "user-x" });
+        Assert.True(resp.HasActiveSubscription);
+        Assert.Equal(7, resp.RemainingCredits);
+    }
+}

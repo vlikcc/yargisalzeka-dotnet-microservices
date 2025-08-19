@@ -1,0 +1,35 @@
+﻿using PactNet;
+using PactNet.Infrastructure.Outputters;
+using PactNet.Verifier;
+using Xunit;
+using Microsoft.AspNetCore.Mvc.Testing;
+using System;
+using System.Collections.Generic;
+using System.IO;
+
+namespace IdentityService.ProviderPactTests;
+
+public class ProviderPactVerificationTests : IClassFixture<WebApplicationFactory<Program>>
+{
+    private readonly WebApplicationFactory<Program> _factory;
+    public ProviderPactVerificationTests(WebApplicationFactory<Program> factory) => _factory = factory;
+
+    [Fact(Skip="Configure pact files path and broker before running")] // Placeholder
+    public void VerifyPacts()
+    {
+        var pactDir = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "pacts");
+        if (!Directory.Exists(pactDir))
+            throw new DirectoryNotFoundException(pactDir);
+
+        var config = new PactVerifierConfig
+        {
+            Outputters = new List<IOutput>
+            {
+                new ConsoleOutput()
+            }
+        };
+
+        var verifier = new PactVerifier(config);
+        var uri = _factory.Server.BaseAddress.ToString().TrimEnd('/');
+        verifier.ServiceProvider("IdentityService", uri)
+            .WithDirectorySource(new DirectoryInfo(pactDir))

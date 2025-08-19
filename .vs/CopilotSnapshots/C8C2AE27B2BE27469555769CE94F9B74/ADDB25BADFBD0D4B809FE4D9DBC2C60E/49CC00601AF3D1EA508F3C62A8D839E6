@@ -1,0 +1,20 @@
+﻿using Microsoft.EntityFrameworkCore;
+using subscriptions;
+using SubscriptionService.DbContexts;
+using SubscriptionService.Services;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<SubscriptionDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddGrpc();
+
+var app = builder.Build();
+
+app.MapGrpcService<SubscriptionGrpcService>();
+app.MapGet("/", () => "SubscriptionService is running. Use a gRPC client to connect.");
+
+app.Run();
+
+public partial class Program { }
