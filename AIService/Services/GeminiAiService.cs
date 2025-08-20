@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using AIService.Models;
@@ -10,8 +9,8 @@ public class GeminiAiService : IGeminiAiService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<GeminiAiService> _logger;
     private readonly string _apiKey;
-    private const string FlashModel = "gemini-1.5-flash";
-    private const string ProModel = "gemini-1.5-pro";
+    private const string FlashModel = "gemini-2.5-pro";
+    private const string ProModel = "gemini-2.5-pro";
 
     public GeminiAiService(IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<GeminiAiService> logger)
     {
@@ -20,17 +19,37 @@ public class GeminiAiService : IGeminiAiService
         _apiKey = configuration["Gemini:ApiKey"] ?? string.Empty;
     }
 
+    public async Task<CaseAnalysisResponse> AnalyzeCaseTextAsync(string caseText)
+    {
+        var prompt = $$"""
+        Aşağıdaki hukuki olay metnini analiz et.
+        Olay metni:
+        {{caseText}}
+        Aşağıdaki formatta cevap ver:
+        ANALIZ: [Kısa açıklama]   
+        """;
+        try
+        {
+            var text = await SendPromptAsync(prompt, ProModel);
+            return new CaseAnalysisResponse { AnalysisResult = text };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Olay metni analiz hatası");
+            return new CaseAnalysisResponse { AnalysisResult = "Olay metni analiz hatası" };
+        }
+    }
     public async Task<List<string>> ExtractKeywordsFromCaseAsync(string caseText)
     {
         var prompt = $$"""
-A?a??daki hukuki olay metnini analiz et ve Yarg?tay kararlar?nda arama yapmak i�in en uygun anahtar kelimeleri �?kar.
-Anahtar kelimeler T�rk hukuku terminolojisine uygun olmal?.
+Aşağıdaki hukuki olay metnini analiz et ve Yargıtay kararlarında arama yapmak için en uygun anahtar kelimeleri çıkar.
+Anahtar kelimeler Türk hukuku terminolojisine uygun olmalı.
 
 Olay metni:
-{caseText}
+{{caseText}}
 
-Sadece anahtar kelimeleri virg�lle ay?rarak listele. A�?klama yazma.
-�rnek format: "tazminat, s�zle?me ihlali, maddi zarar, manevi tazminat"
+Sadece anahtar kelimeleri virgülle ayırarak listele. Açıklama yazma.
+Örnek format: "tazminat, sözleşme ihlali, maddi zarar, manevi tazminat"
 """;
         try
         {
@@ -44,27 +63,27 @@ Sadece anahtar kelimeleri virg�lle ay?rarak listele. A�?klama yazma.
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Anahtar kelime �?karma hatas?");
-            return new List<string> { "tazminat", "hukuki sorumluluk" };
+            _logger.LogError(ex, "Anahtar kelime çıkarma hatası");
+            return ex.Message.Split(',').ToList();
         }
     }
 
     public async Task<RelevanceResponse> AnalyzeDecisionRelevanceAsync(string caseText, string decisionText)
     {
-        var truncated = decisionText.Length > 2000 ? decisionText[..2000] : decisionText;
+        var truncated = decisionText;
         var prompt = $$"""
-Olay metni ile Yarg?tay karar? aras?ndaki ili?kiyi analiz et.
+Olay metni ile Yargıtay kararı arasındaki ilişkiyi analiz et.
 
-OLAY METN?:
-{caseText}
+OLAY METNİ:
+{{caseText}}
 
-YARGITAY KARARI (k?salt?lm??):
-{truncated}
+YARGITAY KARARI (kısaltılmış):
+{{truncated}}
 
-A?a??daki formatta cevap ver:
-PUAN: [0-100 aras? say?]
-A�IKLAMA: [K?sa a�?klama]
-BENZERLIK: [Hangi konularda benzer]
+Aşağıdaki formatta cevap ver:
+PUAN: [0-100 arası sayı]
+AÇIKLAMA: [Kısa açıklama]
+BENZERLİK: [Hangi konularda benzer]
 """;
         try
         {
@@ -73,8 +92,8 @@ BENZERLIK: [Hangi konularda benzer]
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Karar analiz hatas?");
-            return new RelevanceResponse { Score = 50, Explanation = "Analiz s?ras?nda hata olu?tu", Similarity = "Belirlenemedi" };
+            _logger.LogError(ex, "Karar analiz hatası");
+            return new RelevanceResponse { Score = 50, Explanation = "Analiz sırasında hata oluştu", Similarity = "Belirlenemedi" };
         }
     }
 
@@ -85,20 +104,20 @@ BENZERLIK: [Hangi konularda benzer]
         {
             var summary = d.Summary;
             if (!string.IsNullOrEmpty(summary) && summary.Length > 200) summary = summary[..200];
-            sb.AppendLine($"- {d.Title ?? "Ba?l?k yok"}: {summary ?? "�zet yok"}");
+            sb.AppendLine($"- {d.Title ?? "Başlık yok"}: {summary ?? "Özet yok"}");
         }
         var prompt = $$"""
-A?a??daki bilgileri kullanarak hukuki dilek�e ?ablonu olu?tur.
+Aşağıdaki bilgileri kullanarak hukuki dilekçe şablonu oluştur.
 
-OLAY METN?:
-{caseText}
+OLAY METNİ:
+{{caseText}}
 
 ALAKALI YARGITAY KARARLARI:
-{sb}
+{{sb}}
 
-Standart hukuki dilek�e format?nda, emsal kararlar? referans alan bir ?ablon �ret.
-B�l�mler:
-- Ba?l?k
+Standart hukuki dilekçe formatında, emsal kararları referans alan bir şablon üret.
+Bölümler:
+- Başlık
 - Taraflar
 - Olaylar
 - Hukuki Dayanak
@@ -112,8 +131,8 @@ B�l�mler:
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Dilek�e olu?turma hatas?");
-            return "Dilek�e ?ablonu olu?turulamad?. L�tfen tekrar deneyin.";
+            _logger.LogError(ex, "Dilekçe oluşturma hatası");
+            return "Dilekçe şablonu oluşturulamadı. Lütfen tekrar deneyin.";
         }
     }
 
@@ -163,12 +182,12 @@ B�l�mler:
 
     private RelevanceResponse ParseAnalysisResponse(string text)
     {
-        var resp = new RelevanceResponse { Score = 50, Explanation = "Analiz tamamland?", Similarity = "Genel" };
+        var resp = new RelevanceResponse { Score = 50, Explanation = "Analiz tamamlandı", Similarity = "Genel" };
         foreach (var line in text.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
             if (line.StartsWith("PUAN:", StringComparison.OrdinalIgnoreCase) && int.TryParse(line.Split(':', 2)[1].Trim(), out var s))
                 resp.Score = Math.Clamp(s, 0, 100);
-            else if (line.StartsWith("A�IKLAMA:", StringComparison.OrdinalIgnoreCase))
+            else if (line.StartsWith("AÇIKLAMA:", StringComparison.OrdinalIgnoreCase))
                 resp.Explanation = line.Split(':', 2)[1].Trim();
             else if (line.StartsWith("BENZER", StringComparison.OrdinalIgnoreCase))
                 resp.Similarity = line.Split(':', 2)[1].Trim();

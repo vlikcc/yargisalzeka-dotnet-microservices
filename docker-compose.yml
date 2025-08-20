@@ -1,0 +1,126 @@
+
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:17
+    container_name: yargisalzeka-postgres
+    environment:
+      POSTGRES_PASSWORD: Srmn1931
+      POSTGRES_DB: yargitay_kararlari
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - yargisalzeka-network
+
+  # OpenSearch (Optional - for advanced search)
+  opensearch:
+    image: opensearchproject/opensearch:2.11.0
+    container_name: yargisalzeka-opensearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    networks:
+      - yargisalzeka-network
+
+  # Identity Service
+  identity-service:
+    build:
+      context: .
+      dockerfile: IdentityService/Dockerfile
+    container_name: yargisalzeka-identity
+    ports:
+      - "5001:5001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5001
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=IdentityDb;User Id=postgres;Password=DB_PASSWORD;
+      - Jwt__Key=JWT_KEY
+      - Jwt__Issuer=http://localhost:5001
+      - Jwt__Audience=http://localhost:5001
+    depends_on:
+      - postgres
+    networks:
+      - yargisalzeka-network
+
+  # Subscription Service
+  subscription-service:
+    build:
+      context: .
+      dockerfile: SubscriptionService/Dockerfile
+    container_name: yargisalzeka-subscription
+    ports:
+      - "5002:5002"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5002
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=SubscriptionDb;User Id=postgres;Password=DB_PASSWORD;
+    depends_on:
+      - postgres
+    networks:
+      - yargisalzeka-network
+
+  # Search Service
+  search-service:
+    build:
+      context: .
+      dockerfile: SearchService/Dockerfile
+    container_name: yargisalzeka-search
+    ports:
+      - "5043:5043"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5043
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=yargitay_kararlari;Username=postgres;Password=DB_PASSWORD
+      - Search__Provider=postgres
+      - OpenSearch__Uri=http://opensearch:9200
+      - OpenSearch__Index=decisions
+      - Database__EnsureCreated=false
+    depends_on:
+      - postgres
+      - opensearch
+    networks:
+      - yargisalzeka-network
+
+  # AI Service
+  ai-service:
+    build:
+      context: .
+      dockerfile: AIService/Dockerfile
+    container_name: yargisalzeka-ai
+    ports:
+      - "5012:5012"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5012
+      - Jwt__Key=JWT_KEY
+      - Jwt__Issuer=http://localhost:5001
+      - Jwt__Audience=http://localhost:5001
+      - Gemini__ApiKey=GEMINI_API_KEY
+      - SearchService__BaseUrl=http://search-service:5043
+    depends_on:
+      - identity-service
+      - search-service
+      - subscription-service
+    networks:
+      - yargisalzeka-network
+
+volumes:
+  postgres_data:
+  opensearch_data:
+
+networks:
+  yargisalzeka-network:
+    driver: bridge

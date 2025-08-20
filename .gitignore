@@ -42,7 +42,6 @@ bld/
 # Docker
 .dockerignore
 Dockerfile
-docker-compose*.yml
 
 # Environment files
 appsettings.*.json
@@ -62,3 +61,27 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Build outputs
+bin/
+obj/
+
+# Docker
+.dockerignore
+
+# IDE
+.vs/
+*.user
+
+
+# Build outputs
+bin/
+obj/
+
+# Docker
+.dockerignore
+
+# IDE
+.vs/
+*.user
+

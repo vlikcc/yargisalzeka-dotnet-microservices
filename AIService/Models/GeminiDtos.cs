@@ -36,3 +36,31 @@ public class PetitionRequest
     [Required]
     public List<RelevantDecisionDto> RelevantDecisions { get; set; } = new();
 }
+
+public class SearchDecisionsRequest
+{
+    [Required]
+    public List<string> Keywords { get; set; } = new();
+}
+
+public class DecisionSearchResult
+{
+    public long Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Excerpt { get; set; } = string.Empty;
+    public DateTime? DecisionDate { get; set; } // Nullable yap
+    public string Court { get; set; } = string.Empty;
+}
+
+public class CaseAnalysisRequest
+{
+    [Required]
+    public string CaseText { get; set; } = string.Empty;
+    
+
+}
+
+public class CaseAnalysisResponse
+{
+     public string AnalysisResult { get; set; } = string.Empty;
+}

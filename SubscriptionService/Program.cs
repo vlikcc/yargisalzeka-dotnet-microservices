@@ -24,6 +24,13 @@ builder.Services.AddGrpc();
 
 var app = builder.Build();
 
+// Opsiyonel şema oluşturma
+using (var scope = app.Services.CreateScope())
+{
+    var ctx = scope.ServiceProvider.GetRequiredService<SubscriptionDbContext>();
+    ctx.Database.EnsureCreated();
+}
+
 app.MapGrpcService<SubscriptionGrpcService>();
 app.MapGet("/", () => "SubscriptionService is running. Use a gRPC client to connect.");
 

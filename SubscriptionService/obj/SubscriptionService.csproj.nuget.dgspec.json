@@ -1,32 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\velikececi\\source\\repos\\yargisalzeka-Dotnet\\SubscriptionService\\SubscriptionService.csproj": {}
+    "/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/SubscriptionService/SubscriptionService.csproj": {}
   },
   "projects": {
-    "C:\\Users\\velikececi\\source\\repos\\yargisalzeka-Dotnet\\Protos\\Protos.csproj": {
+    "/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/Protos/Protos.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\velikececi\\source\\repos\\yargisalzeka-Dotnet\\Protos\\Protos.csproj",
+        "projectUniqueName": "/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/Protos/Protos.csproj",
         "projectName": "Protos",
-        "projectPath": "C:\\Users\\velikececi\\source\\repos\\yargisalzeka-Dotnet\\Protos\\Protos.csproj",
-        "packagesPath": "C:\\Users\\velikececi\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\velikececi\\source\\repos\\yargisalzeka-Dotnet\\Protos\\obj\\",
+        "projectPath": "/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/Protos/Protos.csproj",
+        "packagesPath": "/Users/velikececi/.nuget/packages/",
+        "outputPath": "/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/Protos/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\velikececi\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/Users/velikececi/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
+          "/usr/local/share/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -45,7 +39,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net9.0": {
@@ -66,41 +60,35 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.200/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\velikececi\\source\\repos\\yargisalzeka-Dotnet\\SubscriptionService\\SubscriptionService.csproj": {
+    "/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/SubscriptionService/SubscriptionService.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\velikececi\\source\\repos\\yargisalzeka-Dotnet\\SubscriptionService\\SubscriptionService.csproj",
+        "projectUniqueName": "/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/SubscriptionService/SubscriptionService.csproj",
         "projectName": "SubscriptionService",
-        "projectPath": "C:\\Users\\velikececi\\source\\repos\\yargisalzeka-Dotnet\\SubscriptionService\\SubscriptionService.csproj",
-        "packagesPath": "C:\\Users\\velikececi\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\velikececi\\source\\repos\\yargisalzeka-Dotnet\\SubscriptionService\\obj\\",
+        "projectPath": "/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/SubscriptionService/SubscriptionService.csproj",
+        "packagesPath": "/Users/velikececi/.nuget/packages/",
+        "outputPath": "/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/SubscriptionService/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\velikececi\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/Users/velikececi/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
+          "/usr/local/share/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "C:\\Users\\velikececi\\source\\repos\\yargisalzeka-Dotnet\\Protos\\Protos.csproj": {
-                "projectPath": "C:\\Users\\velikececi\\source\\repos\\yargisalzeka-Dotnet\\Protos\\Protos.csproj"
+              "/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/Protos/Protos.csproj": {
+                "projectPath": "/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/Protos/Protos.csproj"
               }
             }
           }
@@ -115,7 +103,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net9.0": {
@@ -171,7 +159,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.200/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
