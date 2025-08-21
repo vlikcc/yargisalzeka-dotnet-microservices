@@ -25,27 +25,26 @@ namespace AIService.Controllers
         public async Task<IActionResult> Analyze([FromBody] AnalysisRequest request)
         {
             var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            // Granüler erişim kontrolü CaseAnalysis üzerinden yapılır
+            var access = await _subscriptionClient.ValidateFeatureAccessAsync(new ValidateFeatureAccessRequest
             {
-                return Unauthorized();
-            }
-
-            _logger.LogInformation("Kullanıcının aboneliği kontrol ediliyor: {UserId}", userId);
-
-            var statusResponse = await _subscriptionClient.CheckSubscriptionStatusAsync(
-                new CheckStatusRequest { UserId = userId });
-
-            if (!statusResponse.HasActiveSubscription || statusResponse.RemainingCredits <= 0)
-            {
-                return Forbid("Aktif abonelik veya kalan kredi yok.");
-            }
+                UserId = userId,
+                FeatureType = FeatureTypes.CaseAnalysis
+            });
+            if (!access.HasAccess) return Forbid(access.Message);
 
             var resultSummary = $"İşlenen metin uzunluğu: {request.Text?.Length ?? 0}";
-            // Burada AI modeli ile analiz işlemi yapılır.
 
-            _logger.LogInformation("Kullanıcı {UserId} için analiz tamamlandı. Kalan kredi: {Credits}", userId, statusResponse.RemainingCredits);
+            // Kullanım kaydı (fire & forget)
+            _ = _subscriptionClient.ConsumeFeatureAsync(new ConsumeFeatureRequest
+            {
+                UserId = userId,
+                FeatureType = FeatureTypes.CaseAnalysis
+            });
 
-            return Ok(new { Durum = "Analiz Tamamlandı", Ozet = resultSummary, KalanKredi = statusResponse.RemainingCredits - 1 });
+            return Ok(new { Durum = "Analiz Tamamlandı", Ozet = resultSummary });
         }
     }
 }

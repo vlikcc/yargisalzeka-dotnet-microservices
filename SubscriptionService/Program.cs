@@ -21,18 +21,28 @@ else
 }
 
 builder.Services.AddGrpc();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Opsiyonel şema oluşturma
+// Migration uygulama (EnsureCreated yerine)
 using (var scope = app.Services.CreateScope())
 {
     var ctx = scope.ServiceProvider.GetRequiredService<SubscriptionDbContext>();
-    ctx.Database.EnsureCreated();
+    ctx.Database.Migrate();
+}
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.MapGrpcService<SubscriptionGrpcService>();
-app.MapGet("/", () => "SubscriptionService is running. Use a gRPC client to connect.");
+app.MapControllers();
+app.MapGet("/", () => "SubscriptionService is running. Use a gRPC or HTTP client to connect.");
 
 app.Run();
 

@@ -291,3 +291,10 @@ C:/Users/velikececi/source/repos/yargisalzeka.Net/IdentityService/obj/Debug/net9
 /Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/IdentityService/obj/Debug/net9.0/IdentityService.pdb
 /Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/IdentityService/obj/Debug/net9.0/IdentityService.genruntimeconfig.cache
 /Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/IdentityService/obj/Debug/net9.0/ref/IdentityService.dll
+/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/IdentityService/bin/Debug/net9.0/Google.Protobuf.dll
+/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/IdentityService/bin/Debug/net9.0/Grpc.Core.Api.dll
+/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/IdentityService/bin/Debug/net9.0/Grpc.Net.Client.dll
+/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/IdentityService/bin/Debug/net9.0/Grpc.Net.ClientFactory.dll
+/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/IdentityService/bin/Debug/net9.0/Grpc.Net.Common.dll
+/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/IdentityService/bin/Debug/net9.0/Protos.dll
+/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/IdentityService/bin/Debug/net9.0/Protos.pdb

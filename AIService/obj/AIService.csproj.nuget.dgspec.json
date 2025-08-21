@@ -147,6 +147,25 @@
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
+          "dependencies": {
+            "Google.Protobuf": {
+              "target": "Package",
+              "version": "[3.27.2, )"
+            },
+            "Grpc.Core.Api": {
+              "target": "Package",
+              "version": "[2.65.0, )"
+            },
+            "Grpc.Net.Client": {
+              "target": "Package",
+              "version": "[2.65.0, )"
+            },
+            "Grpc.Tools": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.65.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",

@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using subscriptions;
+using Grpc.Core;
 
 namespace IdentityService.Controllers
 {
@@ -19,15 +21,19 @@ namespace IdentityService.Controllers
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthController> _logger;
 
+    private readonly Subscription.SubscriptionClient _subscriptionClient;
+
         public AuthController(UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IConfiguration configuration,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            Subscription.SubscriptionClient subscriptionClient)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
             _logger = logger;
+            _subscriptionClient = subscriptionClient;
         }
 
         [HttpPost("register")]
@@ -55,6 +61,26 @@ namespace IdentityService.Controllers
             }
 
             _logger.LogInformation("Yeni kullanıcı kaydedildi: {Email}", request.Email);
+
+            // Trial abonelik ata (gRPC)
+            // Trial abonelik ataması (gRPC) - Proto henüz üretilmediyse hataları yut
+            try
+            {
+#if SUBSCRIPTION_GRPC
+                var trialResponse = await _subscriptionClient.AssignTrialSubscriptionAsync(new AssignTrialRequest { UserId = user.Id });
+                if (!trialResponse.Success)
+                {
+                    _logger.LogWarning("Trial abonelik atama başarısız: {Msg}", trialResponse.Message);
+                }
+#else
+                _ = _subscriptionClient; // suppress unused warning
+#endif
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Trial abonelik atama denemesi başarısız (opsiyonel)");
+            }
+
             var token = await GenerateJwtToken(user);
             return Ok(new AuthResponse { Token = token.Token, ExpiresAtUtc = token.ExpiresAtUtc });
         }

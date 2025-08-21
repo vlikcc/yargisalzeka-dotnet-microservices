@@ -3,17 +3,24 @@
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:17
+    image: postgres:17-alpine
     container_name: yargisalzeka-postgres
     environment:
-      POSTGRES_PASSWORD: Srmn1931
-      POSTGRES_DB: yargitay_kararlari
+      - POSTGRES_PASSWORD=DB_PASSWORD
+      - POSTGRES_USER=postgres
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      
     networks:
       - yargisalzeka-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   # OpenSearch (Optional - for advanced search)
   opensearch:
@@ -32,6 +39,21 @@ services:
       - "9600:9600"
     volumes:
       - opensearch_data:/usr/share/opensearch/data
+    networks:
+      - yargisalzeka-network
+
+  # Frontend (Vite React served via Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_BACKEND_URL: http://ai-service:5012
+    container_name: yargisalzeka-frontend
+    ports:
+      - "5173:80" # host:container
+    depends_on:
+      - ai-service
     networks:
       - yargisalzeka-network
 
@@ -119,7 +141,11 @@ services:
 
 volumes:
   postgres_data:
+    name: yargisalzeka-dotnet-microservices_postgres_data
+    external: true
   opensearch_data:
+    name: yargisalzeka-dotnet-microservices_opensearch_data
+    external: true
 
 networks:
   yargisalzeka-network:

@@ -22,3 +22,4 @@ C:/Users/velikececi/source/repos/yargisalzeka.Net/Protos/obj/Debug/net9.0/ref/Pr
 /Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/Protos/obj/Debug/net9.0/refint/Protos.dll
 /Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/Protos/obj/Debug/net9.0/Protos.pdb
 /Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/Protos/obj/Debug/net9.0/ref/Protos.dll
+/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/Protos/obj/Debug/net9.0/Protos.csproj.AssemblyReference.cache

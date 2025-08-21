@@ -14,6 +14,7 @@ builder.Services.AddGrpcClient<Subscription.SubscriptionClient>(o =>
 
 // Gemini service registration
 builder.Services.AddScoped<IGeminiAiService, GeminiAiService>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddHttpClient("Gemini");
 
@@ -54,6 +55,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Abonelik kontrolü middleware'i ekle
+app.UseMiddleware<AIService.Middleware.SubscriptionCheckMiddleware>();
 
 app.MapControllers();
 

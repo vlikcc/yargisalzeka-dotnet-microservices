@@ -5,6 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using IdentityService.DbContexts;
 using IdentityService.Entities;
+using Grpc.Net.ClientFactory;
+using subscriptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,13 +31,19 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
     };
 });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// gRPC client for SubscriptionService
+builder.Services.AddGrpcClient<Subscription.SubscriptionClient>(o =>
+{
+    o.Address = new Uri(builder.Configuration["GrpcServices:SubscriptionUrl"]!);
+});
 
 var app = builder.Build();
 

@@ -22,9 +22,8 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Protobuf Include="..\Protos\Protos\subscriptions.proto" GrpcServices="Client" Link="Protos\subscriptions.proto" />
-  </ItemGroup>
+  <!-- Removed direct Protobuf include to avoid duplicate type generation.
+       Protos project reference supplies generated gRPC types. -->
 
   <ItemGroup>
     <ProjectReference Include="..\Protos\Protos.csproj" />

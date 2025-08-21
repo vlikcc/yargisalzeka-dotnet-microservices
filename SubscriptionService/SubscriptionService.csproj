@@ -21,9 +21,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Protobuf Include="..\Protos\Protos\subscriptions.proto" GrpcServices="Server" Link="Protos\subscriptions.proto" />
-  </ItemGroup>
+  <!-- Removed duplicate proto generation to rely solely on shared Protos project -->
 
   <ItemGroup>
     <ProjectReference Include="..\Protos\Protos.csproj" />

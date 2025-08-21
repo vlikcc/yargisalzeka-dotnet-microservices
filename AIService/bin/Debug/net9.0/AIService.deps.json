@@ -272,6 +272,11 @@
       },
       "System.Runtime.CompilerServices.Unsafe/6.0.0": {},
       "Protos/1.0.0": {
+        "dependencies": {
+          "Google.Protobuf": "3.27.2",
+          "Grpc.Core.Api": "2.65.0",
+          "Grpc.Net.Client": "2.65.0"
+        },
         "runtime": {
           "Protos.dll": {
             "assemblyVersion": "1.0.0.0",

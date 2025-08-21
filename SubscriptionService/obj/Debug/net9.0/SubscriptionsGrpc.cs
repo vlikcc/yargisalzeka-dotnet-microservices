@@ -49,6 +49,22 @@ namespace subscriptions {
     static readonly grpc::Marshaller<global::subscriptions.CheckStatusRequest> __Marshaller_subscriptions_CheckStatusRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::subscriptions.CheckStatusRequest.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::subscriptions.CheckStatusResponse> __Marshaller_subscriptions_CheckStatusResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::subscriptions.CheckStatusResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::subscriptions.ConsumeFeatureRequest> __Marshaller_subscriptions_ConsumeFeatureRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::subscriptions.ConsumeFeatureRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::subscriptions.ConsumeFeatureResponse> __Marshaller_subscriptions_ConsumeFeatureResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::subscriptions.ConsumeFeatureResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::subscriptions.GetRemainingCreditsRequest> __Marshaller_subscriptions_GetRemainingCreditsRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::subscriptions.GetRemainingCreditsRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::subscriptions.GetRemainingCreditsResponse> __Marshaller_subscriptions_GetRemainingCreditsResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::subscriptions.GetRemainingCreditsResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::subscriptions.ValidateFeatureAccessRequest> __Marshaller_subscriptions_ValidateFeatureAccessRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::subscriptions.ValidateFeatureAccessRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::subscriptions.ValidateFeatureAccessResponse> __Marshaller_subscriptions_ValidateFeatureAccessResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::subscriptions.ValidateFeatureAccessResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::subscriptions.AssignTrialRequest> __Marshaller_subscriptions_AssignTrialRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::subscriptions.AssignTrialRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::subscriptions.AssignTrialResponse> __Marshaller_subscriptions_AssignTrialResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::subscriptions.AssignTrialResponse.Parser));
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Method<global::subscriptions.CheckStatusRequest, global::subscriptions.CheckStatusResponse> __Method_CheckSubscriptionStatus = new grpc::Method<global::subscriptions.CheckStatusRequest, global::subscriptions.CheckStatusResponse>(
@@ -57,6 +73,38 @@ namespace subscriptions {
         "CheckSubscriptionStatus",
         __Marshaller_subscriptions_CheckStatusRequest,
         __Marshaller_subscriptions_CheckStatusResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::subscriptions.ConsumeFeatureRequest, global::subscriptions.ConsumeFeatureResponse> __Method_ConsumeFeature = new grpc::Method<global::subscriptions.ConsumeFeatureRequest, global::subscriptions.ConsumeFeatureResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "ConsumeFeature",
+        __Marshaller_subscriptions_ConsumeFeatureRequest,
+        __Marshaller_subscriptions_ConsumeFeatureResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::subscriptions.GetRemainingCreditsRequest, global::subscriptions.GetRemainingCreditsResponse> __Method_GetRemainingCredits = new grpc::Method<global::subscriptions.GetRemainingCreditsRequest, global::subscriptions.GetRemainingCreditsResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "GetRemainingCredits",
+        __Marshaller_subscriptions_GetRemainingCreditsRequest,
+        __Marshaller_subscriptions_GetRemainingCreditsResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::subscriptions.ValidateFeatureAccessRequest, global::subscriptions.ValidateFeatureAccessResponse> __Method_ValidateFeatureAccess = new grpc::Method<global::subscriptions.ValidateFeatureAccessRequest, global::subscriptions.ValidateFeatureAccessResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "ValidateFeatureAccess",
+        __Marshaller_subscriptions_ValidateFeatureAccessRequest,
+        __Marshaller_subscriptions_ValidateFeatureAccessResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::subscriptions.AssignTrialRequest, global::subscriptions.AssignTrialResponse> __Method_AssignTrialSubscription = new grpc::Method<global::subscriptions.AssignTrialRequest, global::subscriptions.AssignTrialResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "AssignTrialSubscription",
+        __Marshaller_subscriptions_AssignTrialRequest,
+        __Marshaller_subscriptions_AssignTrialResponse);
 
     /// <summary>Service descriptor</summary>
     public static global::Google.Protobuf.Reflection.ServiceDescriptor Descriptor
@@ -74,6 +122,30 @@ namespace subscriptions {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
 
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::subscriptions.ConsumeFeatureResponse> ConsumeFeature(global::subscriptions.ConsumeFeatureRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::subscriptions.GetRemainingCreditsResponse> GetRemainingCredits(global::subscriptions.GetRemainingCreditsRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::subscriptions.ValidateFeatureAccessResponse> ValidateFeatureAccess(global::subscriptions.ValidateFeatureAccessRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::subscriptions.AssignTrialResponse> AssignTrialSubscription(global::subscriptions.AssignTrialRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
     }
 
     /// <summary>Creates service definition that can be registered with a server</summary>
@@ -82,7 +154,11 @@ namespace subscriptions {
     public static grpc::ServerServiceDefinition BindService(SubscriptionBase serviceImpl)
     {
       return grpc::ServerServiceDefinition.CreateBuilder()
-          .AddMethod(__Method_CheckSubscriptionStatus, serviceImpl.CheckSubscriptionStatus).Build();
+          .AddMethod(__Method_CheckSubscriptionStatus, serviceImpl.CheckSubscriptionStatus)
+          .AddMethod(__Method_ConsumeFeature, serviceImpl.ConsumeFeature)
+          .AddMethod(__Method_GetRemainingCredits, serviceImpl.GetRemainingCredits)
+          .AddMethod(__Method_ValidateFeatureAccess, serviceImpl.ValidateFeatureAccess)
+          .AddMethod(__Method_AssignTrialSubscription, serviceImpl.AssignTrialSubscription).Build();
     }
 
     /// <summary>Register service method with a service binder with or without implementation. Useful when customizing the service binding logic.
@@ -93,6 +169,10 @@ namespace subscriptions {
     public static void BindService(grpc::ServiceBinderBase serviceBinder, SubscriptionBase serviceImpl)
     {
       serviceBinder.AddMethod(__Method_CheckSubscriptionStatus, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::subscriptions.CheckStatusRequest, global::subscriptions.CheckStatusResponse>(serviceImpl.CheckSubscriptionStatus));
+      serviceBinder.AddMethod(__Method_ConsumeFeature, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::subscriptions.ConsumeFeatureRequest, global::subscriptions.ConsumeFeatureResponse>(serviceImpl.ConsumeFeature));
+      serviceBinder.AddMethod(__Method_GetRemainingCredits, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::subscriptions.GetRemainingCreditsRequest, global::subscriptions.GetRemainingCreditsResponse>(serviceImpl.GetRemainingCredits));
+      serviceBinder.AddMethod(__Method_ValidateFeatureAccess, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::subscriptions.ValidateFeatureAccessRequest, global::subscriptions.ValidateFeatureAccessResponse>(serviceImpl.ValidateFeatureAccess));
+      serviceBinder.AddMethod(__Method_AssignTrialSubscription, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::subscriptions.AssignTrialRequest, global::subscriptions.AssignTrialResponse>(serviceImpl.AssignTrialSubscription));
     }
 
   }

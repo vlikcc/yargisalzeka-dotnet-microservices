@@ -3,6 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using SearchService.DbContexts;
 using OpenSearch.Client;
 using SearchService.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using subscriptions;
 
 namespace SearchService;
 
@@ -19,6 +23,26 @@ public class Program
 		builder.Services.AddDbContext<SearchDbContext>(options =>
 			options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 		);
+
+		// JWT auth
+		builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+			.AddJwtBearer(o =>
+			{
+				o.TokenValidationParameters = new TokenValidationParameters
+				{
+					ValidateIssuer = false,
+					ValidateAudience = false,
+					ValidateLifetime = true,
+					ValidateIssuerSigningKey = false,
+					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "insecure-dev-key"))
+				};
+			});
+
+		// gRPC client
+		builder.Services.AddGrpcClient<Subscription.SubscriptionClient>(o =>
+		{
+			o.Address = new Uri(builder.Configuration["GrpcServices:SubscriptionUrl"]!);
+		});
 
 		// OpenSearch client
 		builder.Services.AddSingleton<IOpenSearchClient>(sp =>
@@ -54,7 +78,7 @@ public class Program
 			});
 		}
 
-		// Opsiyonel şema oluşturma
+		// Opsiyonel şema oluşturma (EnsureCreated)
 		var ensureCreated = app.Services.GetRequiredService<IConfiguration>().GetValue<bool>("Database:EnsureCreated");
 		if (ensureCreated)
 		{
@@ -65,6 +89,8 @@ public class Program
 			}
 		}
 
+		app.UseAuthentication();
+		app.UseAuthorization();
 		app.MapControllers();
 
 		app.Run();

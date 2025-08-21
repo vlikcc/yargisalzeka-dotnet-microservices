@@ -64,3 +64,11 @@ public class CaseAnalysisResponse
 {
      public string AnalysisResult { get; set; } = string.Empty;
 }
+
+public class TestTokenRequest
+{
+    [Required]
+    public string UserId { get; set; } = string.Empty;
+    [Required]
+    public string Email { get; set; } = string.Empty;
+}

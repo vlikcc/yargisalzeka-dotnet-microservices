@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "bQST2RX/hXw=",
+  "dgSpecHash": "OhVwcO8dS/I=",
   "success": true,
   "projectFilePath": "/Users/velikececi/Documents/yargisalzeka.net-1/yargisalzeka-dotnet-microservices/SubscriptionService/SubscriptionService.csproj",
   "expectedPackageFiles": [
-    "/Users/velikececi/.nuget/packages/google.protobuf/3.27.0/google.protobuf.3.27.0.nupkg.sha512",
+    "/Users/velikececi/.nuget/packages/google.protobuf/3.27.2/google.protobuf.3.27.2.nupkg.sha512",
     "/Users/velikececi/.nuget/packages/grpc.aspnetcore/2.65.0/grpc.aspnetcore.2.65.0.nupkg.sha512",
     "/Users/velikececi/.nuget/packages/grpc.aspnetcore.server/2.65.0/grpc.aspnetcore.server.2.65.0.nupkg.sha512",
     "/Users/velikececi/.nuget/packages/grpc.aspnetcore.server.clientfactory/2.65.0/grpc.aspnetcore.server.clientfactory.2.65.0.nupkg.sha512",
