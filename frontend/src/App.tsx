@@ -5,6 +5,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { AppLayout } from './components/layout/AppLayout';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import LandingPage from './pages/marketing/LandingPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import SearchPage from './pages/search/SearchPage';
 import SubscriptionPage from './pages/subscription/SubscriptionPage';
@@ -16,7 +17,8 @@ import { SearchProvider } from './contexts/SearchContext';
 
 function ProtectedRoute({ children }: { children: React.ReactElement }) {
   const { state } = useAuth();
-  if (!state.token) return <Navigate to="/login" replace />;
+  if (state.loading) return <div className="p-6">Yükleniyor...</div>;
+  if (!state.user) return <Navigate to="/login" replace />;
   return children;
 }
 
@@ -26,10 +28,11 @@ export default function App() {
       <ErrorBoundary>
       <Suspense fallback={<div className="p-4">Yükleniyor...</div>}>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route
-            path="/*"
+            path="/app/*"
             element={
               <ProtectedRoute>
                 <SubscriptionProvider>
@@ -49,6 +52,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
   </Suspense>
   </ErrorBoundary>

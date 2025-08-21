@@ -16,7 +16,7 @@ export default function LoginPage() {
     try {
       const res = await authService.login(data);
       login(res.token, res.user);
-      navigate('/');
+  navigate('/app');
     } catch {
       // Basit hata gösterimi ileride toasta dönüşecek
       alert('Giriş başarısız');

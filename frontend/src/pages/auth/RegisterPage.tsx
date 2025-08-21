@@ -16,7 +16,7 @@ export default function RegisterPage() {
     try {
       const res = await authService.register(data);
       login(res.token, res.user);
-      navigate('/');
+  navigate('/app');
     } catch {
       alert('Kayıt başarısız');
     }
