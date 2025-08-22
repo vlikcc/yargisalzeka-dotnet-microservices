@@ -48,7 +48,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_BACKEND_URL: http://ai-service:5012
+        VITE_BACKEND_URL: http://api-gateway:5000
     container_name: yargisalzeka-frontend
     ports:
       - "5173:80" # host:container
@@ -136,6 +136,26 @@ services:
       - identity-service
       - search-service
       - subscription-service
+    networks:
+      - yargisalzeka-network
+
+  
+  # API Gateway (Ocelot)
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    container_name: yargisalzeka-apigateway
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+    depends_on:
+      - identity-service
+      - subscription-service
+      - search-service
+      - ai-service
     networks:
       - yargisalzeka-network
 

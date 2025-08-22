@@ -4,11 +4,15 @@ import { Sidebar } from './Sidebar';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen flex bg-white text-gray-900">
+    <div className="min-h-screen bg-neutral-50 text-neutral-900">
       <Sidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col md:ml-0">
         <Header />
-        <main className="p-6 flex-1 bg-gray-50">{children}</main>
+        <main className="flex-1 p-6 lg:p-8 bg-neutral-50/50">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );
