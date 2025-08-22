@@ -137,20 +137,143 @@ namespace IdentityService.Controllers
             return Ok(new { Mesaj = "Şifre başarıyla değiştirildi" });
         }
 
+        // Admin endpoints
+        [HttpGet("users")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = _userManager.Users.Select(u => new UserDto
+            {
+                Id = u.Id,
+                Email = u.Email ?? string.Empty,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Role = u.Role,
+                IsActive = u.IsActive,
+                CreatedAt = u.CreatedAt,
+                LastLoginAt = u.LastLoginAt,
+                SubscriptionEndDate = u.SubscriptionEndDate
+            }).ToList();
+
+            return Ok(users);
+        }
+
+        [HttpPut("users/{userId}/role")]
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> UpdateUserRole(string userId, [FromBody] UpdateRoleRequest request)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound(new { Message = "Kullanıcı bulunamadı" });
+
+            user.Role = request.Role;
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+
+            _logger.LogInformation("Kullanıcı rolü güncellendi: {UserId} -> {Role}", userId, request.Role);
+            return Ok(new { Message = "Kullanıcı rolü güncellendi" });
+        }
+
+        [HttpPut("users/{userId}/status")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<IActionResult> ToggleUserStatus(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound(new { Message = "Kullanıcı bulunamadı" });
+
+            user.IsActive = !user.IsActive;
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+
+            _logger.LogInformation("Kullanıcı durumu güncellendi: {UserId} -> {Status}", userId, user.IsActive);
+            return Ok(new { Message = $"Kullanıcı {(user.IsActive ? "aktif" : "pasif")} hale getirildi" });
+        }
+
+        [HttpDelete("users/{userId}")]
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound(new { Message = "Kullanıcı bulunamadı" });
+
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+
+            _logger.LogInformation("Kullanıcı silindi: {UserId}", userId);
+            return Ok(new { Message = "Kullanıcı başarıyla silindi" });
+        }
+
+        [HttpGet("admin-stats")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<IActionResult> GetAdminStats()
+        {
+            var totalUsers = _userManager.Users.Count();
+            var activeUsers = _userManager.Users.Count(u => u.IsActive);
+            var adminUsers = _userManager.Users.Count(u => u.Role == "Admin" || u.Role == "SuperAdmin");
+            var recentUsers = _userManager.Users.Count(u => u.CreatedAt > DateTime.UtcNow.AddDays(-7));
+
+            return Ok(new
+            {
+                TotalUsers = totalUsers,
+                ActiveUsers = activeUsers,
+                AdminUsers = adminUsers,
+                RecentUsers = recentUsers,
+                InactiveUsers = totalUsers - activeUsers
+            });
+        }
+
+        // Create first admin user (for initial setup)
+        [HttpPost("create-admin")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CreateFirstAdmin([FromBody] CreateAdminRequest request)
+        {
+            // Only allow if no admin users exist yet
+            var existingAdmins = _userManager.Users.Count(u => u.Role == "Admin" || u.Role == "SuperAdmin");
+            if (existingAdmins > 0)
+            {
+                return BadRequest(new { Message = "Admin kullanıcısı zaten mevcut" });
+            }
+
+            var user = new ApplicationUser
+            {
+                UserName = request.Email,
+                Email = request.Email,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                Role = "SuperAdmin",
+                IsActive = true
+            };
+
+            var result = await _userManager.CreateAsync(user, request.Password);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            _logger.LogInformation("İlk SuperAdmin kullanıcısı oluşturuldu: {Email}", request.Email);
+            return Ok(new { Message = "SuperAdmin kullanıcısı başarıyla oluşturuldu" });
+        }
+
         private async Task<(string Token, DateTime ExpiresAtUtc)> GenerateJwtToken(ApplicationUser user)
         {
             var key = _configuration["Jwt:Key"]!;
             var issuer = _configuration["Jwt:Issuer"];
             var audience = _configuration["Jwt:Audience"];
 
-            var userRoles = await _userManager.GetRolesAsync(user);
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, user.Role)
             };
-            claims.AddRange(userRoles.Select(r => new Claim(ClaimTypes.Role, r)));
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -190,5 +313,31 @@ namespace IdentityService.Controllers
     {
         public string Token { get; set; } = string.Empty;
         public DateTime ExpiresAtUtc { get; set; }
+    }
+
+    public class UserDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? LastLoginAt { get; set; }
+        public DateTime? SubscriptionEndDate { get; set; }
+    }
+
+    public class UpdateRoleRequest
+    {
+        public string Role { get; set; } = string.Empty; // User, Admin, SuperAdmin
+    }
+
+    public class CreateAdminRequest
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
     }
 }

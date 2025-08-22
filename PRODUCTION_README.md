@@ -73,7 +73,33 @@ sudo chown -R 1001:1001 /data/opensearch
 
 # Veya manuel deployment
 docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Database migration'ları kontrol edin
+./scripts/migrate.sh
 ```
+
+#### 4.1 Veritabanı Otomatik Oluşturma
+
+**Production'da veritabanları otomatik olarak oluşturulur:**
+
+- ✅ **PostgreSQL Databases**: İlk başlatmada otomatik oluşturulur
+  - `IdentityDb` - Kullanıcı ve kimlik bilgileri
+  - `SubscriptionDb` - Abonelik bilgileri
+  - `DocumentDb` - Doküman ve dilekçe verileri
+  - `yargitay_kararlari` - Yargıtay kararları
+  - `AIDb` - AI servis verileri
+
+- ✅ **Tablolar**: Her servis kendi tablolarını otomatik oluşturur
+  - IdentityService: ASP.NET Identity tabloları
+  - SearchService: Arama ve karar tabloları
+  - DocumentService: Doküman ve dilekçe tabloları
+  - SubscriptionService: Abonelik tabloları
+
+- ✅ **İlk Admin Kullanıcı**: Sistemde admin yoksa otomatik oluşturulur
+
+**Migration Yaklaşımı:**
+- Development: `Database.EnsureCreated()` - Hızlı geliştirme
+- Production: Migration scripts - Güvenli ve versiyonlanabilir
 
 #### 5. Reverse Proxy (Nginx) Konfigürasyonu
 
@@ -276,6 +302,9 @@ Herhangi bir sorun yaşarsanız:
 - [ ] SSL/TLS sertifikası kuruldu
 - [ ] Firewall konfigüre edildi
 - [ ] Database volumes oluşturuldu
+- [ ] Veritabanları otomatik oluşturulacak ✅
+- [ ] Tablolar otomatik oluşturulacak ✅
+- [ ] Migration scripts hazır ✅
 - [ ] Backup stratejisi tanımlandı
 - [ ] Monitoring araçları kuruldu
 - [ ] Health checks test edildi

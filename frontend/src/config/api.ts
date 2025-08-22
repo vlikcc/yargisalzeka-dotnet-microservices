@@ -20,9 +20,9 @@ export const ENDPOINTS = {
     ASSIGN_TRIAL: '/api/subscription/assign-trial'
   },
   AI: {
-    ANALYZE_CASE: '/api/ai/analyze-case',
-    EXTRACT_KEYWORDS: '/api/ai/extract-keywords',
-    SCORE_DECISIONS: '/api/ai/score-decisions'
+    ANALYZE_CASE: '/api/gemini/analyze-case',
+    EXTRACT_KEYWORDS: '/api/gemini/extract-keywords',
+    SCORE_DECISIONS: '/api/gemini/score-decisions'
   },
   SEARCH: {
     SEARCH: '/api/search/search',

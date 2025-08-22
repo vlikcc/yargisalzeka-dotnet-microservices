@@ -1,4 +1,4 @@
-interface StoredUser { id: string; email: string; firstName?: string; lastName?: string; }
+interface StoredUser { id: string; email: string; firstName?: string; lastName?: string; role?: string; }
 
 const TOKEN_KEY = 'yz_token';
 const REFRESH_KEY = 'yz_refresh';

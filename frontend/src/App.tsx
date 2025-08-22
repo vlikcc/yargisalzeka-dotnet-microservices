@@ -12,6 +12,9 @@ import SubscriptionPage from './pages/subscription/SubscriptionPage';
 import HistoryPage from './pages/history/HistoryPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import PetitionHistoryPage from './pages/petition/PetitionHistoryPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import UserManagement from './pages/admin/UserManagement';
+import SystemMonitoring from './pages/admin/SystemMonitoring';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import { SearchProvider } from './contexts/SearchContext';
 
@@ -19,6 +22,18 @@ function ProtectedRoute({ children }: { children: React.ReactElement }) {
   const { state } = useAuth();
   if (state.loading) return <div className="p-6">Yükleniyor...</div>;
   if (!state.user) return <Navigate to="/login" replace />;
+  return children;
+}
+
+function AdminProtectedRoute({ children }: { children: React.ReactElement }) {
+  const { state } = useAuth();
+  if (state.loading) return <div className="p-6">Yükleniyor...</div>;
+  if (!state.user) return <Navigate to="/login" replace />;
+
+  // Admin rolü kontrolü
+  const isAdmin = state.user.role === 'Admin' || state.user.role === 'SuperAdmin';
+  if (!isAdmin) return <Navigate to="/app" replace />;
+
   return children;
 }
 
@@ -50,6 +65,23 @@ export default function App() {
                   </SearchProvider>
                 </SubscriptionProvider>
               </ProtectedRoute>
+            }
+          />
+
+          {/* Admin Routes */}
+          <Route
+            path="/admin/*"
+            element={
+              <AdminProtectedRoute>
+                <AppLayout>
+                  <Routes>
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="users" element={<UserManagement />} />
+                    <Route path="monitoring" element={<SystemMonitoring />} />
+                  </Routes>
+                </AppLayout>
+              </AdminProtectedRoute>
             }
           />
           <Route path="*" element={<Navigate to="/" replace />} />

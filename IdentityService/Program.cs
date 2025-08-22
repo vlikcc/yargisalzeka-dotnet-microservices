@@ -56,11 +56,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Opsiyonel şema oluşturma
-using (var scope = app.Services.CreateScope())
+// Database initialization - only in development
+if (app.Environment.IsDevelopment())
 {
-    var ctx = scope.ServiceProvider.GetRequiredService<IdentitiyDbContext>();
-    ctx.Database.EnsureCreated();
+    using (var scope = app.Services.CreateScope())
+    {
+        var ctx = scope.ServiceProvider.GetRequiredService<IdentitiyDbContext>();
+        ctx.Database.EnsureCreated();
+    }
 }
 
 app.UseHttpsRedirection();

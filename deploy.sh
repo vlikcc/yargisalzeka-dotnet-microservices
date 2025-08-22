@@ -46,6 +46,9 @@ docker-compose $COMPOSE_FILE up -d --build
 echo "⏳ Waiting for services to be healthy..."
 sleep 30
 
+echo "🔄 Running database migrations..."
+./scripts/migrate.sh
+
 echo "🔍 Checking service health..."
 docker-compose $COMPOSE_FILE ps
 

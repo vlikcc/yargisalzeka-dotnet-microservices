@@ -2,7 +2,7 @@ import { createContext, useContext, ReactNode, useEffect, useReducer, useCallbac
 import { authStore } from '../services/localAuthStore';
 import { authService } from '../services/authService';
 
-export interface User { id: string; email: string; firstName?: string; lastName?: string; }
+export interface User { id: string; email: string; firstName?: string; lastName?: string; role?: string; }
 
 interface AuthState { user: User | null; token: string | null; loading: boolean; error: string | null; }
 type AuthAction =

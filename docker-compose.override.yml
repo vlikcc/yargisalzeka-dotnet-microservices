@@ -5,28 +5,35 @@
 version: '3.8'
 
 services:
-  # Development-specific overrides
+  # Development-specific overrides - Farklı veritabanı isimleri kullan
   postgres:
     environment:
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=yargisalzeka_dev  # Development için ayrı database
     ports:
       - "5432:5432"
+    volumes:
+      # Mevcut production veritabanını korumak için ayrı volume
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./scripts/init-dev.sql:/docker-entrypoint-initdb.d/init-dev.sql:ro
 
   frontend:
     ports:
       - "3000:80" # Development port
 
-  # Development logging and debugging
+  # Development logging and debugging - Farklı veritabanı isimleri kullan
   ai-service:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5012
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=AIDb_dev;User Id=postgres;Password=postgres;
     volumes:
       - ./AIService:/app/src:ro
 
   identity-service:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=IdentityDb_dev;User Id=postgres;Password=postgres;
     volumes:
       - ./IdentityService:/app/src:ro
 
@@ -39,17 +46,24 @@ services:
   search-service:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=yargitay_kararlari_dev;Username=postgres;Password=postgres;
     volumes:
       - ./SearchService:/app/src:ro
 
   subscription-service:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=SubscriptionDb_dev;User Id=postgres;Password=postgres;
     volumes:
       - ./SubscriptionService:/app/src:ro
 
   document-service:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=DocumentDb_dev;User Id=postgres;Password=postgres;
     volumes:
       - ./DocumentService:/app/src:ro
+
+volumes:
+  postgres_dev_data:
+    driver: local

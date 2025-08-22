@@ -12,6 +12,6 @@ export interface DecisionScoringResponse { scoredDecisions: ScoredDecision[]; }
 
 export const aiService = {
   extractKeywords: (payload: KeywordExtractionRequest) => httpClient.post<KeywordExtractionResponse>(ENDPOINTS.AI.EXTRACT_KEYWORDS, payload),
-  analyzeCase: (payload: CaseAnalysisRequest) => httpClient.post<CaseAnalysisResponse>(ENDPOINTS.AI.ANALYZE_CASE, payload),
-  scoreDecisions: (payload: DecisionScoringRequest) => httpClient.post<DecisionScoringResponse>(ENDPOINTS.AI.SCORE_DECISIONS, payload)
+  analyzeCase: (payload: CaseAnalysisRequest) => httpClient.post<CaseAnalysisResponse>(ENDPOINTS.AI.ANALYZE_CASE, payload)
+  // scoreDecisions removed as it's not available in GeminiController
 };

@@ -8,13 +8,6 @@
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
-      "DownstreamPathTemplate": "/api/ai{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [ { "Host": "ai-service", "Port": 5012 } ],
-      "UpstreamPathTemplate": "/ai{everything}",
-      "UpstreamHttpMethod": [ "POST" ]
-    },
-    {
       "DownstreamPathTemplate": "/api/gemini/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [ { "Host": "ai-service", "Port": 5012 } ],

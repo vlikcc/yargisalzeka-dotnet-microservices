@@ -1,94 +1,272 @@
-﻿# Yargısal Zeka .NET Mikroservis Projesi
+﻿# 🚀 Yargısal Zeka .NET Mikroservis Projesi
 
-Bu depo; kimlik doğrulama, abonelik yönetimi, yapay zeka destekli analiz, belge (döküman) üretimi ve API Gateway bileşenlerinden oluşan .NET 9 tabanlı bir mikroservis mimarisi örneğidir.
+Modern, production-ready microservices architecture ile Yargısal Zeka platformu. Google Gemini AI, PostgreSQL, OpenSearch ve React frontend ile tam entegre sistem.
 
-## Mimari Bileşenler
-- IdentityService: Kullanıcı kayıt & doğrulama, JWT üretimi.
-- SubscriptionService: Kullanıcı abonelik ve kredi (RemainingCredits) takibi (gRPC + EF Core).
-- AIService: Abonelikten kalan krediye göre analiz işlemi (örnek uç nokta /api/ai). gRPC client ile SubscriptionService'e gider.
-- DocumentService: (Genişletilebilir) Belge üretimi / yönetimi için gRPC servisi iskeleti.
-- ApiGateway: Servislere tek giriş noktası (Ocelot konfigürasyonu eklenebilir).
-- Protos: Ortak .proto tanımları (subscriptions.proto).
-- Tests klasörü: Birim, entegrasyon ve (şimdilik devre dışı bırakılmış) Pact sözleşme testleri örnekleri.
+## 📋 Özellikler
 
-## Teknolojiler
-- .NET 9, C# 13
-- ASP.NET Core Web API & gRPC
-- Entity Framework Core (InMemory & PostgreSQL sağlayıcıları)
-- JWT Authentication
-- PactNet (Sözleşme testleri – yapılandırma bekliyor)
-- xUnit, Moq
+### 🔐 **Authentication & Authorization**
+- JWT tabanlı kimlik doğrulama
+- Role-based access control (User, Admin, SuperAdmin)
+- Admin dashboard ve kullanıcı yönetimi
 
-## Hızlı Başlangıç
-1. Depoyu klonlayın.
-2. Gerekli NuGet paketleri restore edilir: `dotnet restore`
-3. Çözümü derleyin: `dotnet build`
-4. Geliştirme sırasında tek tek servisleri çalıştırabilirsiniz:
-   - Örnek: `dotnet run --project IdentityService/IdentityService.csproj`
-5. (Opsiyonel) PostgreSQL kullanacaksanız IdentityService ve SubscriptionService appsettings.json içindeki bağlantı bilgisini güncelleyin, migration üretin.
+### 🤖 **AI & Analytics**
+- Google Gemini AI entegrasyonu
+- Anahtar kelime çıkarma
+- Dava analizi ve ilgili karar bulma
+- Dilekçe oluşturma
 
-## Migration (Örnek - IdentityService)
+### 🏗️ **Microservices Architecture**
+- **IdentityService**: Kullanıcı yönetimi ve JWT token
+- **SubscriptionService**: Abonelik ve kredi takibi
+- **AIService**: Google Gemini AI işlemleri
+- **SearchService**: Yargıtay kararı arama ve index
+- **DocumentService**: Doküman yönetimi
+- **ApiGateway**: Ocelot ile centralized routing
+
+### 🗄️ **Database & Search**
+- PostgreSQL ile ilişkisel veri
+- OpenSearch ile full-text search
+- Entity Framework Core migrations
+- Otomatik database oluşturma
+
+## ⚡ Hızlı Başlangıç
+
+### Local Development (Önerilen) - Production Veritabanını Koruyarak
+
+```bash
+# 1. Projeyi klonlayın
+git clone https://github.com/vlikcc/yargisalzeka-dotnet-microservices.git
+cd yargisalzeka-dotnet-microservices
+
+# 2. ⚠️ PRODUCTION VERİTABANINI YEDEKLEYİN
+./scripts/backup-production.sh
+
+# 3. Environment dosyasını oluşturun
+cp .env.example .env
+# .env dosyasını düzenleyin (JWT_KEY, DB_PASSWORD, GEMINI_API_KEY)
+
+# 4. Servisleri başlatın (development veritabanları otomatik oluşturulacak)
+docker-compose up -d
+
+# 5. Health check yapın
+curl http://localhost:5000/health
+
+# 6. Admin kullanıcısı oluşturun
+curl -X POST http://localhost:5001/api/auth/create-admin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@test.com",
+    "password": "Admin123!",
+    "firstName": "Admin",
+    "lastName": "User"
+  }'
 ```
-cd IdentityService
- dotnet ef migrations add InitialIdentitySchema -c IdentityDbContext
- dotnet ef database update -c IdentityDbContext
-cd ..
-```
-SubscriptionService için benzer şekilde kendi DbContext ve modellerinizi ekledikten sonra migration oluşturabilirsiniz.
 
-## Testler
-Tüm testleri çalıştırmak:
+### Detaylı Kurulum
+Detaylı kurulum adımları için `LOCAL_DEVELOPMENT.md` dosyasını inceleyin.
+
+### Docker Compose Yapılandırması
+Projemizde **3 farklı Docker Compose dosyası** bulunmaktadır:
+
+- **`docker-compose.yml`** - Ana yapılandırma dosyası
+- **`docker-compose.override.yml`** - Development override (otomatik kullanılır)
+- **`docker-compose.prod.yml`** - Production override (manuel olarak belirtilmelidir)
+
+**Kullanım:**
+
+```bash
+# Development (otomatik override kullanır)
+docker-compose up -d
+
+# Production (manuel override belirtin)
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Belirli bir override ile
+docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
 ```
+
+### Quick Start
+5 dakikalık hızlı kurulum için `QUICK_START.md` dosyasını inceleyin.
+
+## 🧪 Test ve API Endpoints
+
+### Testleri Çalıştırma
+```bash
+# Tüm testleri çalıştır
 dotnet test
+
+# Belirli bir projenin testlerini çalıştır
+dotnet test Tests/IdentityService.UnitTests/IdentityService.UnitTests.csproj
+
+# Coverage ile test çalıştır
+dotnet test --collect:"XPlat Code Coverage"
 ```
-Notlar:
-- Pact test projeleri (Provider / Consumer) şu anda Skip attribute ile devre dışı. Gerçek bir Pact Broker veya pact dosyası yolu ayarlanana kadar bu şekilde bırakılabilir.
-- Entegrasyon testleri InMemory veritabanı ve TestServer (WebApplicationFactory) kullanır.
 
-## Abonelik Akışı (Örnek)
-1. İstemci AIService /api/ai uç noktasına yetkili (JWT) istek gönderir.
-2. AIService, SubscriptionService gRPC metodunu (`CheckSubscriptionStatus`) çağırır.
-3. Kredi yoksa 403 döner, varsa analiz simülasyonu sonucu ve güncel kredi (örnek decrement simülasyonu) döndürülür.
+### API Endpoints
 
-## gRPC Tanımı
-`Protos/Protos/subscriptions.proto` içinde:
+#### Authentication
+```bash
+# Admin kullanıcısı oluştur
+POST http://localhost:5001/api/auth/create-admin
+
+# Login
+POST http://localhost:5000/api/auth/login
+
+# Kullanıcı listesi (Admin)
+GET http://localhost:5001/api/auth/users
 ```
-service Subscription {
-  rpc CheckSubscriptionStatus (CheckStatusRequest) returns (CheckStatusResponse);
-}
+
+#### AI Operations
+```bash
+# Anahtar kelime çıkarma
+POST http://localhost:5000/api/gemini/extract-keywords
+
+# Dava analizi
+POST http://localhost:5000/api/gemini/analyze-case
+
+# Dilekçe oluşturma
+POST http://localhost:5000/api/gemini/generate-petition
 ```
-Kod üretimi SubscriptionService (Server) ve client kullanan servislerde (AIService, test projeleri) csproj içindeki `<Protobuf ...>` öğeleri ile sağlanır.
 
-## Ortam Değişkenleri / Yapılandırma
-- IdentityService: `Jwt:Key`, `Jwt:Issuer`, `Jwt:Audience` zorunlu.
-- SubscriptionService: `ConnectionStrings:DefaultConnection` (PostgreSQL) veya InMemory için konfigürasyon.
-- AIService: `GrpcServices:SubscriptionUrl` (SubscriptionService adresi) – development için `http://localhost:<port>`.
+#### Search Operations
+```bash
+# Yargıtay kararı arama
+POST http://localhost:5000/api/search
 
-## Geliştirme İpuçları
-- Yeni bir gRPC metod eklerken önce `.proto` dosyasını Protos projesine ekleyin, ardından ilgili servis projelerine Client/Server olarak referanslayın.
-- Ortak modeller HTTP üzerinden paylaşılmayacaksa (sadece gRPC) tekrar eden DTO sınıflarını minimal tutun.
-- Test projelerinde namespace uyuşmazlıklarını azaltmak için ana projelerde kök namespace sabit bırakın.
+# Arama geçmişi
+GET http://localhost:5000/api/search/history
+```
 
-## Pact Testleri (Gelecek Çalışma)
-- Consumer tarafında etkileşim tanımları hazırlandıktan sonra pact dosyaları oluşturulur.
-- Provider doğrulaması için Pact Broker veya local pact dosya dizini yapılandırılmalı.
-- Şu anda ilgili testler geçici olarak basitleştirildi (derleme sorunsuz olsun diye).
+### Health Checks
+```bash
+# Tüm servisler
+curl http://localhost:5000/health  # API Gateway
+curl http://localhost:5001/health  # Identity Service
+curl http://localhost:5002/health  # Subscription Service
+curl http://localhost:5012/health  # AI Service
+curl http://localhost:5043/health  # Search Service
+```
 
-## Yol Haritası (Öneri)
-- Kredi tüketimi ve güncellemesi için SubscriptionService'e `ConsumeCredit` gRPC metodu ekleme.
-- DocumentService için `GenerateDocument` gRPC sözleşmesi tanımlama.
-- API Gateway (Ocelot) konfigürasyonunu tüm servisleri kapsayacak şekilde genişletme.
-- Merkezi kimlik doğrulama / yetkilendirme politikaları.
-- Docker & docker-compose orkestrasyonu (PostgreSQL + tüm servisler).
-- CI (GitHub Actions) pipeline: build + test + (ileride) pact publish / verify adımları.
+### Automated Test Script
+Local environment'ı test etmek için hazır script:
+```bash
+./test-local.sh
+```
 
-## Katkı
-Pull request gönderirken: 
-1. `dotnet build` ve `dotnet test` temiz geçmeli.
-2. Yeni public API veya gRPC değişikliklerinde README güncellemesi ekleyin.
+## 🗄️ Database Management
 
-## Lisans
-(İsteğe bağlı lisans bilgisini buraya ekleyin.)
+### Otomatik Database Oluşturma
+Production deployment sırasında 5 database otomatik oluşturulur:
+- `yargisalzeka` - Ana database
+- `IdentityDb` - Kullanıcı bilgileri
+- `SubscriptionDb` - Abonelik verileri
+- `DocumentDb` - Doküman verileri
+- `AIDb` - AI servis verileri
+
+### Manual Migration (Eski Yöntem)
+```bash
+cd IdentityService
+dotnet ef migrations add InitialIdentitySchema -c IdentityDbContext
+dotnet ef database update -c IdentityDbContext
+```
+
+## 🔧 Development Tools
+
+### Docker Commands
+```bash
+# Servisleri başlat
+docker-compose up -d
+
+# Logları takip et
+docker-compose logs -f
+
+# Servis durumunu kontrol et
+docker-compose ps
+
+# Servisleri durdur
+docker-compose down
+```
+
+### Database Connection
+```bash
+# PostgreSQL'e bağlan
+docker exec -it yargisalzeka-postgres psql -U postgres -d yargisalzeka
+
+# Database listesi
+\l
+
+# Tablo listesi
+\dt
+```
+
+## 📊 Monitoring
+
+### Application Metrics
+- Tüm servislerde `/health` endpoint'i mevcut
+- JWT token validation
+- Database connection pooling
+- gRPC communication monitoring
+
+### Production Deployment
+Production deployment için `deploy.sh` script'i kullanın:
+```bash
+./deploy.sh production
+```
+
+Detaylı deployment bilgisi için `PRODUCTION_README.md` dosyasını inceleyin.
+
+## 🤝 Katkı
+
+### Development Guidelines
+1. **Branch Strategy**: Feature branch'ler kullanın (`feature/yeni-ozellik`)
+2. **Code Quality**: `dotnet build` ve `dotnet test` başarılı olmalı
+3. **Documentation**: Yeni API'ler için README güncelleyin
+4. **Testing**: Unit test'ler yazın
+
+### Pull Request Process
+1. Feature branch'inizi oluşturun
+2. Değişikliklerinizi commit edin
+3. Testleri çalıştırın
+4. Pull request oluşturun
+5. Code review'dan geçmesini bekleyin
+
+## 📄 Lisans
+
+Bu proje eğitim ve öğrenme amaçlı oluşturulmuştur. Ticari kullanım için lisans şartları uygulanabilir.
+
+## 📞 Destek
+
+- **Issues**: https://github.com/vlikcc/yargisalzeka-dotnet-microservices/issues
+- **Discussions**: GitHub Discussions
+- **Email**: velikececi@gmail.com
+
+## 🎯 Roadmap
+
+### ✅ Completed Features
+- [x] Microservices architecture
+- [x] Google Gemini AI integration
+- [x] JWT authentication & role management
+- [x] Admin dashboard
+- [x] PostgreSQL & OpenSearch integration
+- [x] Docker containerization
+- [x] Production deployment setup
+- [x] Health checks & monitoring
+
+### 🚧 In Progress
+- [ ] Advanced analytics dashboard
+- [ ] Document template management
+- [ ] Multi-language support
+- [ ] Mobile app development
+
+### 📋 Planned Features
+- [ ] AI model fine-tuning
+- [ ] Advanced search filters
+- [ ] Bulk operations
+- [ ] API rate limiting
+- [ ] Backup & recovery automation
 
 ---
-Sorular için issue açabilirsiniz. İyi çalışmalar!
+
+**🚀 Yargısal Zeka platformu ile güçlü ve modern bir microservices sistemi oluşturduk!**
+
+Herhangi bir sorunuz olursa issue açmaktan çekinmeyin. İyi çalışmalar! 🎉
