@@ -43,6 +43,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Health Checks
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -55,6 +58,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Health check endpoint
+app.MapHealthChecks("/health");
 
 // Abonelik kontrolü middleware'i ekle
 app.UseMiddleware<AIService.Middleware.SubscriptionCheckMiddleware>();

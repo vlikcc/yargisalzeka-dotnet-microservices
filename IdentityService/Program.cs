@@ -39,6 +39,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Health Checks
+builder.Services.AddHealthChecks();
+
 // gRPC client for SubscriptionService
 builder.Services.AddGrpcClient<Subscription.SubscriptionClient>(o =>
 {
@@ -63,6 +66,10 @@ using (var scope = app.Services.CreateScope())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Health check endpoint
+app.MapHealthChecks("/health");
+
 app.MapControllers();
 app.Run();
 

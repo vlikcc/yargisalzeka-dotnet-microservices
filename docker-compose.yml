@@ -6,21 +6,30 @@ services:
     image: postgres:17-alpine
     container_name: yargisalzeka-postgres
     environment:
-      - POSTGRES_PASSWORD=DB_PASSWORD
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
       - POSTGRES_USER=postgres
+      - POSTGRES_DB=yargisalzeka
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      
     networks:
       - yargisalzeka-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 10s
       retries: 5
-      start_period: 5s
+      start_period: 30s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
 
   # OpenSearch (Optional - for advanced search)
   opensearch:
@@ -29,7 +38,9 @@ services:
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "DISABLE_SECURITY_PLUGIN=true"
+      - "DISABLE_INSTALL_DEMO_CONFIG=true"
     ulimits:
       memlock:
         soft: -1
@@ -41,6 +52,21 @@ services:
       - opensearch_data:/usr/share/opensearch/data
     networks:
       - yargisalzeka-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
 
   # Frontend (Vite React served via Nginx)
   frontend:
@@ -51,11 +77,29 @@ services:
         VITE_BACKEND_URL: http://api-gateway:5000
     container_name: yargisalzeka-frontend
     ports:
-      - "5173:80" # host:container
+      - "80:80" # Production port
     depends_on:
-      - ai-service
+      ai-service:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
     networks:
       - yargisalzeka-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
 
   # Identity Service
   identity-service:
@@ -66,16 +110,32 @@ services:
     ports:
       - "5001:5001"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
       - ASPNETCORE_URLS=http://+:5001
-      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=IdentityDb;User Id=postgres;Password=DB_PASSWORD;
-      - Jwt__Key=JWT_KEY
-      - Jwt__Issuer=http://localhost:5001
-      - Jwt__Audience=http://localhost:5001
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=IdentityDb;User Id=postgres;Password=${DB_PASSWORD:-postgres};
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=${JWT_ISSUER:-http://api-gateway:5000}
+      - Jwt__Audience=${JWT_AUDIENCE:-http://api-gateway:5000}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - yargisalzeka-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
 
   # Subscription Service
   subscription-service:
@@ -86,13 +146,29 @@ services:
     ports:
       - "5002:5002"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
       - ASPNETCORE_URLS=http://+:5002
-      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=SubscriptionDb;User Id=postgres;Password=DB_PASSWORD;
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=SubscriptionDb;User Id=postgres;Password=${DB_PASSWORD:-postgres};
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - yargisalzeka-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
 
   # Search Service
   search-service:
@@ -103,18 +179,35 @@ services:
     ports:
       - "5043:5043"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
       - ASPNETCORE_URLS=http://+:5043
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=yargitay_kararlari;Username=postgres;Password=DB_PASSWORD
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=yargitay_kararlari;Username=postgres;Password=${DB_PASSWORD:-postgres}
       - Search__Provider=postgres
       - OpenSearch__Uri=http://opensearch:9200
       - OpenSearch__Index=decisions
       - Database__EnsureCreated=false
     depends_on:
-      - postgres
-      - opensearch
+      postgres:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
     networks:
       - yargisalzeka-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5043/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
 
   # AI Service
   ai-service:
@@ -125,21 +218,72 @@ services:
     ports:
       - "5012:5012"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
       - ASPNETCORE_URLS=http://+:5012
-      - Jwt__Key=JWT_KEY
-      - Jwt__Issuer=http://localhost:5001
-      - Jwt__Audience=http://localhost:5001
-      - Gemini__ApiKey=GEMINI_API_KEY
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=${JWT_ISSUER:-http://api-gateway:5000}
+      - Jwt__Audience=${JWT_AUDIENCE:-http://api-gateway:5000}
+      - Gemini__ApiKey=${GEMINI_API_KEY}
       - SearchService__BaseUrl=http://search-service:5043
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=AIDb;User Id=postgres;Password=${DB_PASSWORD:-postgres};
     depends_on:
-      - identity-service
-      - search-service
-      - subscription-service
+      identity-service:
+        condition: service_healthy
+      search-service:
+        condition: service_healthy
+      subscription-service:
+        condition: service_healthy
     networks:
       - yargisalzeka-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5012/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
 
-  
+  # Document Service (Missing from original config)
+  document-service:
+    build:
+      context: .
+      dockerfile: DocumentService/Dockerfile
+    container_name: yargisalzeka-document
+    ports:
+      - "5003:5003"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
+      - ASPNETCORE_URLS=http://+:5003
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=DocumentDb;User Id=postgres;Password=${DB_PASSWORD:-postgres};
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - yargisalzeka-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
   # API Gateway (Ocelot)
   api-gateway:
     build:
@@ -149,15 +293,36 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
       - ASPNETCORE_URLS=http://+:5000
     depends_on:
-      - identity-service
-      - subscription-service
-      - search-service
-      - ai-service
+      identity-service:
+        condition: service_healthy
+      subscription-service:
+        condition: service_healthy
+      search-service:
+        condition: service_healthy
+      ai-service:
+        condition: service_healthy
+      document-service:
+        condition: service_healthy
     networks:
       - yargisalzeka-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
 
 volumes:
   postgres_data:

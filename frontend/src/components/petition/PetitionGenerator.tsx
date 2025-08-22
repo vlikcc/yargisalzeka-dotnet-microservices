@@ -30,7 +30,7 @@ export function PetitionGenerator({ currentSearch }: Props) {
         value={additional}
         onChange={e => setAdditional(e.target.value)}
       />
-      <Button type="button" disabled={!canGenerate || loading} onClick={submit}>
+      <Button type="button" disabled={!canGenerate || loading} onClick={submit} className="font-medium">
         {loading ? 'Oluşturuluyor...' : 'Dilekçe Oluştur'}
       </Button>
       {!canGenerate && <div className="text-xs text-red-500">Dilekçe hakkınız bulunmuyor.</div>}

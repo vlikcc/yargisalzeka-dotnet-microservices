@@ -25,7 +25,7 @@ export default function SubscriptionPage() {
           <div>Anahtar Kelime: {usage.keywordExtractions}</div>
         </div>
       )}
-  <Button onClick={() => refresh()} size="sm">Yenile</Button>
+  <Button onClick={() => refresh()} size="sm" className="font-medium">Yenile</Button>
     </div>
   );
 }

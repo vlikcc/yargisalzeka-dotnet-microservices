@@ -23,7 +23,7 @@ export default function HistoryPage() {
         ))}
         {history.length === 0 && <div className="text-sm text-gray-500">Geçmiş boş</div>}
       </div>
-      <Button onClick={() => loadHistory()} variant="outline" size="sm">Yenile</Button>
+      <Button onClick={() => loadHistory()} variant="outline" size="sm" className="font-medium">Yenile</Button>
     </div>
   );
 }

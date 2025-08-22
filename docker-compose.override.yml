@@ -1,0 +1,55 @@
+# Development override configuration
+# This file is automatically used by docker-compose in development
+# For production, use docker-compose.prod.yml instead
+
+version: '3.8'
+
+services:
+  # Development-specific overrides
+  postgres:
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+
+  frontend:
+    ports:
+      - "3000:80" # Development port
+
+  # Development logging and debugging
+  ai-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5012
+    volumes:
+      - ./AIService:/app/src:ro
+
+  identity-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./IdentityService:/app/src:ro
+
+  api-gateway:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./ApiGateway:/app/src:ro
+
+  search-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./SearchService:/app/src:ro
+
+  subscription-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./SubscriptionService:/app/src:ro
+
+  document-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./DocumentService:/app/src:ro

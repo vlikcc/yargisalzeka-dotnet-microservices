@@ -38,7 +38,7 @@ export default function RegisterPage() {
         <FormField label="Şifre" error={errors.password?.message}>
           <Input type="password" {...register('password')} />
         </FormField>
-        <Button type="submit" className="w-full" disabled={isSubmitting}>{isSubmitting ? 'Kaydediliyor...' : 'Kayıt Ol'}</Button>
+        <Button type="submit" className="w-full font-medium" disabled={isSubmitting}>{isSubmitting ? 'Kaydediliyor...' : 'Kayıt Ol'}</Button>
         <div className="text-xs text-center text-gray-500">Hesabın var mı? <Link to="/login" className="text-primary underline">Giriş Yap</Link></div>
       </form>
     </div>

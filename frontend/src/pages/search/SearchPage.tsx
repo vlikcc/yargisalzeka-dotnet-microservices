@@ -24,7 +24,7 @@ export default function SearchPage() {
       <h2 className="text-2xl font-semibold">Arama</h2>
       <form onSubmit={submit} className="space-y-2">
         <textarea value={text} onChange={e => setText(e.target.value)} rows={5} className="w-full border rounded p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Olay metnini girin" />
-        <Button disabled={loading}>{loading ? 'Aranıyor...' : 'Ara'}</Button>
+        <Button disabled={loading} className="font-medium">{loading ? 'Aranıyor...' : 'Ara'}</Button>
       </form>
       {(loading || isSearching) && <LoadingState message="Arama yapılıyor" />}
       {(error || flowError) && (
